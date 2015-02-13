@@ -22,7 +22,7 @@ test:
 	    echo "ERROR: Failed to fetch ./relx via trevor" ; \
 	    exit 1 ; \
 	fi
-	@if [[ -f "${TRAVIS_OTP_RELEASE}.plt" ]]; then  \
+	@if test -f "${TRAVIS_OTP_RELEASE}.plt" ; then  \
 	    echo "Plt: ${TRAVIS_OTP_RELEASE}.plt" ; \
 	else \
 	    echo "Failed to fetch ./plt for this supported ${TRAVIS_OTP_RELEASE} environment" ; \
