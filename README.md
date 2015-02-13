@@ -1,4 +1,8 @@
-# **trevor** Because Travis CI leaves a little out if you Erlang/OTP much...
+# **trevor** 
+
+Because Travis CI leaves a little out if you Erlang/OTP much...
+
+## About
 
 This project exists to simplify running Erlang/OTP based builds on the
 Travis Continuous Integration platform.
