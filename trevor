@@ -1,0 +1,295 @@
+#!/usr/bin/env python
+""" Trevor. Because Travis CI leaves a little out if you Erlang/OTP much
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Darach Ennis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This module prepares artefacts cached in this github repository that can
+be fetched via wget or curl in .travis.yml scripts that typically require
+regeneration or caching in travis.
+
+This script uses the ${TRAVIS_OTP_RELEASE} environment variable, which in
+turn is based on kerl build/install/release naming conventions defined by
+the kerl script (at this time).
+
+File: trevor
+
+"""
+
+import os
+import subprocess
+import sys
+import cmd
+
+otp_releases = {
+    # Want a different release? Please fork me and submit a pull request!
+    "17.3",
+    "17.1",
+    "17.0",
+    "R16B03",
+    "R16B02" 
+}
+
+app_exclusions = [
+    "erl_interface",
+    "jinterface"
+]
+
+trevorhub = "https://raw.githubusercontent.com/darach/trevor/master"
+
+def run(cmd):
+    """ Run a system command. Return exit status. Is verbose
+    """
+    s = subprocess.call(cmd,shell=True)
+    ok = s == 0
+    if ok:
+        sys.stdout.write("OK: %s\n" % cmd)
+    else:
+        sys.stderr.write("ERROR: %s\n" % cmd)
+    return ok
+
+def has_kerl():
+    """ Is vanilla untained kerl available, untouched by local hax0r love
+    """
+    home = os.getenv("HOME")
+    return os.path.isfile("%s/.trevor/kerl" % home)
+
+def has_plt(release):
+    """ Do we have dialyzer plt's generated for a release?
+    """
+    here = os.path.dirname(os.path.realpath(__file__))
+    return os.path.exists("%s/plts/%s.plt" % (here,release))
+
+def build(release):
+    """ Build a release using kerl.
+        WARNING: Depends on local $HOME/.kerlrc. Be thee informed!
+    """
+    build = install = release.lower()
+    if (not os.path.exists("%s" % (install))):
+        sys.stdout.write("+ Kerl build: %s\n" % build)
+        run("kerl build %s %s" % (release, build))
+    else:
+        print("  - Skipping build. Already built!")
+
+def install(release):
+    """ Install a release built by kerl
+    """
+    build = release.lower()
+    if (not os.path.exists(build)):
+        sys.stdout.write("+ Kerl install: %s\n" % build)
+        run("kerl install %s %s" % (build, build))
+    else:
+        print("  - Skipping build. Already installed!")
+
+def maybe_wget_kerl():
+    """ If the kerl script isn't locally available. Make it so.
+        Depends on wget
+    """
+    home = os.getenv("HOME")
+    if (not os.path.exists("%s/.trevor" % home)):
+        run("mkdir %s/.trevor" % home)
+    run("wget -O %s/.trevor/kerl https://raw.github.com/spawngrid/kerl/master/kerl" % home)
+    run("chmod +x %s/.trevor/kerl" % home)
+    run("%s/.trevor/kerl update releases" % home)
+
+def maybe_setup(release):
+    """ If a release has not been prepared, then
+        * Build a release
+        * Install the release
+        * Generate dialyzer plt's for the release
+        * Cache the dialyzer plt's in this clone's plt directory
+    """
+    sys.stdout.write("Winking in %s\n" % release)
+    if (not has_plt(release)):
+        build(release)
+        install(release)
+        maybe_build_dialyzer_plt(release)
+
+def has_rebar():
+    """ Is vanilla untained [sic] rebar available, untouched by local hax0r love
+    """
+    return os.path.isfile("tools/rebar/rebar")
+
+def maybe_git_clone_rebar():
+    """ If the rebar script isn't locally available. Make it so.
+        Depends on git clone 
+    """
+    home = os.getenv("HOME")
+    if (not os.path.exists("%s/.trevor" % home)):
+        run("mkdir %s/.trevor" % home)
+    run("git clone git@github.com:rebar/rebar tools/rebar")
+    run("cd tools/rebar && ./bootstrap")
+
+def has_relx():
+    """ Is vanilla untained relx available, untouched by local hax0r love
+    """
+    return os.path.isfile("tools/relx/relx")
+
+def maybe_git_clone_relx():
+    """ If the relx script isn't locally available. Make it so.
+        Depends on git clone
+    """
+    home = os.getenv("HOME")
+    if (not os.path.exists("%s/.trevor" % home)):
+        run("mkdir %s/.trevor" % home)
+    run("git clone git@github.com:erlware/relx tools/relx")
+    run("cd tools/relx && make")
+
+def apps(install):
+    apps = set([x[:x.find("-")] for x in os.listdir("%s/lib" % install)]) - set(app_exclusions)
+    return " ".join(sorted(list(apps)))
+
+def maybe_build_dialyzer_plt(release):
+    """ If the plt for a release hasn't isn't locally available. Make it so.
+        Depends on the release install and this dialyzer invocation
+    """
+    install = release.lower()
+    if (not os.path.exists("dialyzer")):
+        run("mkdir dialyzer")
+        
+    if (not os.path.exists("%s" % (install))):
+        sys.stdout.write("- Cannot run dialyzer build_plt for install: %s\n" % install)
+    else:
+        plt = "dialyzer/%s.plt" % release
+        if (not os.path.exists(plt)):
+            print("  - Building dialyzer_plt: %s" % plt)
+            p = {
+                "a" : apps(install),
+                "i" : install,
+                "p" : plt,
+                "l" : "dialyzer/log-%s.log" % install
+            }
+            run("%(i)s/bin/dialyzer --build_plt --output_plt %(p)s -o %(l)s --apps %(a)s " % p)
+        else:
+            print("  - Skipping dialyzer build_plt. Already built!")
+
+def wink():
+    """ Cycle through releases
+        * Build, install release 
+        * Build dialyzer plts
+        * Want more? Want, moawr? Ai? Yes? Fork me, love me, test me, push me!
+    """
+    if (not has_kerl()):
+        maybe_wget_kerl()
+    if (not has_kerl()):
+        sys.stderr.write("ERROR: Cannot wget kerl! Oh noes!")
+        sys.exit(1)
+    for candidate in otp_releases:
+        maybe_setup(candidate)
+    if (not has_rebar()):
+        maybe_git_clone_rebar()
+    if (not has_rebar()):
+        sys.stderr.write("ERROR: Cannot git clone rebar! Oh noes!")
+        sys.exit(1)
+    if (not has_relx()):
+        maybe_git_clone_relx()
+    if (not has_relx()):
+        sys.stderr.write("ERROR: Cannot git clone relx! Oh noes!")
+        sys.exit(1)
+
+def get(local,remote):
+    artefact = "%s/%s" % (trevorhub,remote)
+    return run("wget -O %s %s" % (local , "%s/%s" % (trevorhub, remote)))
+
+class Commands(cmd.Cmd):
+    """ Trevor's homuncular assistant at your service
+    """
+
+    prompt = 'trevor> '
+
+    def do_interactive(self,line):
+        """ Run trevor interactively
+        """
+        self.cmdloop()
+
+    def do_wink(self,line):
+        """ wink
+        Conditionally build and install OTP releases via kerl
+        """
+        wink()
+
+    def do_get(self,line):
+        """ get <local> <remote>
+
+            Get a remote resource from the trevor github repository
+            and store as a local file relative to the working directory
+            in the path/file indicated by local
+        """
+        if True == get(*line.split()):
+            sys.exit(0)
+        else:
+            sys.exit(1)
+
+    def do_travis(self,line):
+        """ Bootstrap Travis CI environment
+        """
+        otp_release = os.getenv("TRAVIS_OTP_RELEASE")
+        if None == otp_release:
+            print '''
+This project is not setup correctly to run Erlang/OTP projects.
+The following snippet should be added to your .travis.yml file
+to be able to use trevor under travis
+
+# File: .travis.yml
+before_script:
+- sudo apt-get update
+- sudo apt-get install python
+- sudo apt-get install python-setuptools
+- sudo apt-get install python-dev
+- curl -O trevor https://raw.githubusercontent.com/darach/trevor/master/trevor
+- python ./trevor travis
+
+language: erlang
+otp_release:
+  - R16B02
+script: ./rebar
+
+# EOF
+
+'''
+        else:
+            rebar_ok = get("rebar","tools/rebar/rebar")
+            relx_ok = get("relx","tools/relx/relx")
+            plt_ok = get("%s.plt" % otp_release,"dialyzer/%s.plt" % otp_release)
+
+            if (rebar_ok and relx_ok and plt_ok):
+                print "Yay! Nice one trevor!"
+            else:
+                print "Boo! Y U NO LIKE ME?"
+
+    def postloop(self):
+        print
+
+    def emptyline(self):
+        print 'emptyline()'
+        return cmd.Cmd.emptyline(self)
+
+def main(args):
+    if len(args) > 1:
+        Commands().onecmd(' '.join(args[1:]))
+    else:
+        Commands().onecmd('help')
+
+if __name__ == "__main__":
+    main(sys.argv)
