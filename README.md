@@ -2,7 +2,7 @@
 
 __ Because Travis CI leaves a little out if you Erlang/OTP much... __
 
-![Trevor Logo](./media/Trevor_transparent.png =200x)
+![Trevor Logo](https://github.com/darach/trevor/blob/master/media/Trevor_transparent.png =200x)
 
 ## About
 
