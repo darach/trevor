@@ -1,5 +1,3 @@
-REBAR:=rebar
-
 .PHONY: all test
 
 all: test
