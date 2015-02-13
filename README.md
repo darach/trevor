@@ -1,6 +1,6 @@
 # **trevor** 
 
-__ Because Travis CI leaves a little out if you Erlang/OTP much... __
+** A baseball bat to drudgery. Grand. Theft. Automation! ... **
 
 ![Trevor Logo](https://github.com/darach/trevor/blob/master/media/Trevor_transparent.png)
 
@@ -22,7 +22,7 @@ Trevor caches built artefacts in its github repository so you can
 * Fetch rebar, rebar3, relx into your continuous integration environment
 * Fetch prebuild dialyzer
 
-__ Why __
+** Why **
 
 * Tired of rebar and relx changing under my feet
 * Tired of locally cached rebar and relx copies going out of sync
@@ -32,7 +32,7 @@ __ Why __
 
 ## Usage
 
-__ Get listing on available commands __
+** Get listing on available commands **
 
 ```
 
@@ -44,7 +44,7 @@ get  help  interactive  travis  wink
 
 ```
 
-__ Get detailed help on a specific command __
+** Get detailed help on a specific command **
 
 ```
 
@@ -54,7 +54,7 @@ $ ./trevor help wink
         
 ```
 
-__ Install kerl, build and install default set of otp releases, and create plts __
+** Install kerl, build and install default set of otp releases, and create plts **
 
 ```
 
@@ -86,7 +86,7 @@ Already installed builds, installs and dialyzer plts will be skipped.
 
 This is a very convenient way to setup a fresh machine once you've crafted a .kerlrc!
 
-__ On Travis CI, to get a rebar,relx and plt for your current environment's Erlang/OTP __
+** On Travis CI, to get a rebar,relx and plt for your current environment's Erlang/OTP **
 
 ```
 
