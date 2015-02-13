@@ -1,4 +1,4 @@
-# **trevor** 
+# **trevor** [![Build Status](https://travis-ci.org/darach/trevor.svg?branch=master)](https://travis-ci.org/darach/trevor)
 
 ** A baseball bat to drudgery. Grand. Theft. Automation! ... **
 
