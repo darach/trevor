@@ -88,11 +88,29 @@ This is a very convenient way to setup a fresh machine once you've crafted a .ke
 
 ** On Travis CI, to get a rebar,relx and plt for your current environment's Erlang/OTP **
 
+Just start your .travis.yml as follows
 ```
 
-$ ./trevor travis
+before_script:
+- sudo apt-get update
+- sudo apt-get install python
+- sudo apt-get install python-setuptools
+- sudo apt-get install python-dev
+- curl -o trevor https://raw.githubusercontent.com/darach/trevor/master/trevor
+- python ./trevor travis
+
+language: erlang
+otp_release:
+  - 17.3
+  - 17.1
+  - 17.0
+  - R16B03
+  - R16B02
+script: make
 
 ```
+
+Let trevor do the heavy lifting ...
 
 ## LICENSE
 
