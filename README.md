@@ -112,6 +112,10 @@ script: make
 
 Let trevor do the heavy lifting ...
 
+* It will grab rebar
+* It will grab relx
+* It will grab an appropriate base plt for your chosen release 
+
 ## LICENSE
 
 MIT
