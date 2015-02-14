@@ -285,7 +285,7 @@ script: ./rebar
         print
 
     def emptyline(self):
-        print 'emptyline()'
+        print 'Feed me you must. Wait for your commands will I. Oh yes.'
         return cmd.Cmd.emptyline(self)
 
 def main(args):
