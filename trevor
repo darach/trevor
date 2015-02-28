@@ -88,7 +88,7 @@ def build(release):
     build = install = release.lower()
     if (not os.path.exists("%s" % (install))):
         sys.stdout.write("+ Kerl build: %s\n" % build)
-        run("kerl build %s %s" % (release, build))
+        run("~/.trevor/kerl build %s %s" % (release, build))
     else:
         print("  - Skipping build. Already built!")
 
@@ -98,7 +98,7 @@ def install(release):
     build = release.lower()
     if (not os.path.exists(build)):
         sys.stdout.write("+ Kerl install: %s\n" % build)
-        run("kerl install %s %s" % (build, build))
+        run("~/.trevor/kerl install %s %s" % (build, build))
     else:
         print("  - Skipping build. Already installed!")
 
