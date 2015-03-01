@@ -141,6 +141,21 @@ def maybe_git_clone_rebar():
     run("git clone git@github.com:rebar/rebar tools/rebar")
     run("cd tools/rebar && ./bootstrap")
 
+def has_concuerror():
+    """ Is vanilla untained [sic] concuerror available, untouched by local hax0r love
+    """
+    return os.path.isfile("tools/concuerror/concuerror")
+
+def maybe_git_clone_concuerror():
+    """ If the concuerror script isn't locally available. Make it so.
+        Depends on git clone 
+    """
+    home = os.getenv("HOME")
+    if (not os.path.exists("%s/.trevor" % home)):
+        run("mkdir %s/.trevor" % home)
+    run("git clone git@github.com:parapluu/concuerror tools/concuerror")
+    run("cd tools/concuerror && make")
+
 def has_relx():
     """ Is vanilla untained relx available, untouched by local hax0r love
     """
@@ -207,6 +222,11 @@ def wink():
     if (not has_relx()):
         sys.stderr.write("ERROR: Cannot git clone relx! Oh noes!")
         sys.exit(1)
+    if (not has_concuerror()):
+        maybe_git_clone_concuerror()
+    if (not has_concuerror()):
+        sys.stderr.write("ERROR: Cannot git clone concuerror! Oh noes!")
+        sys.exit(1)
 
 def get(local,remote):
     artefact = "%s/%s" % (trevorhub,remote)
@@ -272,11 +292,13 @@ script: ./rebar
         else:
             rebar_ok = get("rebar","tools/rebar/rebar")
             relx_ok = get("relx","tools/relx/relx")
+            relx_ok = get("concuerror","tools/concuerror/concuerror")
             plt_ok = get("%s.plt" % otp_release,"dialyzer/%s.plt" % otp_release)
 
             if (rebar_ok and relx_ok and plt_ok):
                 run("chmod +x ./rebar")
                 run("chmod +x ./relx")
+                run("chmod +x ./concuerror")
                 print "Yay! Nice one trevor!"
             else:
                 print "Boo! Y U NO LIKE ME?"
