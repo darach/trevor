@@ -70,7 +70,7 @@ def run(cmd):
     return ok
 
 def has_kerl():
-    """ Is vanilla untained kerl available, untouched by local hax0r love
+    """ Is vanilla untainted kerl available, untouched by local hax0r love
     """
     home = os.getenv("HOME")
     return os.path.isfile("%s/.trevor/kerl" % home)
@@ -127,7 +127,7 @@ def maybe_setup(release):
         maybe_build_dialyzer_plt(release)
 
 def has_rebar():
-    """ Is vanilla untained [sic] rebar available, untouched by local hax0r love
+    """ Is vanilla untainted [sic] rebar available, untouched by local hax0r love
     """
     return os.path.isfile("tools/rebar/rebar")
 
@@ -142,7 +142,7 @@ def maybe_git_clone_rebar():
     run("cd tools/rebar && ./bootstrap")
 
 def has_rebar3():
-    """ Is vanilla untained [sic] rebar available, untouched by local hax0r love
+    """ Is vanilla untainted [sic] rebar available, untouched by local hax0r love
     """
     return os.path.isfile("tools/rebar3/rebar3")
 
@@ -158,7 +158,7 @@ def maybe_git_clone_rebar3():
 
 
 def has_concuerror():
-    """ Is vanilla untained [sic] concuerror available, untouched by local hax0r love
+    """ Is vanilla untainted [sic] concuerror available, untouched by local hax0r love
     """
     return os.path.isfile("tools/concuerror/concuerror")
 
@@ -173,7 +173,7 @@ def maybe_git_clone_concuerror():
     run("cd tools/concuerror && make")
 
 def has_relx():
-    """ Is vanilla untained relx available, untouched by local hax0r love
+    """ Is vanilla untainted relx available, untouched by local hax0r love
     """
     return os.path.isfile("tools/relx/relx")
 
