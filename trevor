@@ -141,6 +141,22 @@ def maybe_git_clone_rebar():
     run("git clone git@github.com:rebar/rebar tools/rebar")
     run("cd tools/rebar && ./bootstrap")
 
+def has_rebar3():
+    """ Is vanilla untained [sic] rebar available, untouched by local hax0r love
+    """
+    return os.path.isfile("tools/rebar3/rebar3")
+
+def maybe_git_clone_rebar3():
+    """ If the rebar script isn't locally available. Make it so.
+        Depends on git clone 
+    """
+    home = os.getenv("HOME")
+    if (not os.path.exists("%s/.trevor" % home)):
+        run("mkdir %s/.trevor" % home)
+    run("git clone git@github.com:rebar/rebar3 tools/rebar3")
+    run("cd tools/rebar3 && ./bootstrap")
+
+
 def has_concuerror():
     """ Is vanilla untained [sic] concuerror available, untouched by local hax0r love
     """
@@ -217,6 +233,11 @@ def wink():
     if (not has_rebar()):
         sys.stderr.write("ERROR: Cannot git clone rebar! Oh noes!")
         sys.exit(1)
+    if (not has_rebar3()):
+        maybe_git_clone_rebar3()
+    if (not has_rebar3()):
+        sys.stderr.write("ERROR: Cannot git clone rebar3! Oh noes!")
+        sys.exit(1)
     if (not has_relx()):
         maybe_git_clone_relx()
     if (not has_relx()):
@@ -291,14 +312,14 @@ script: ./rebar
 '''
         else:
             rebar_ok = get("rebar","tools/rebar/rebar")
+            rebar3_ok = get("rebar3","tools/rebar3/rebar3")
             relx_ok = get("relx","tools/relx/relx")
-            relx_ok = get("concuerror","tools/concuerror/concuerror")
             plt_ok = get("%s.plt" % otp_release,"dialyzer/%s.plt" % otp_release)
 
-            if (rebar_ok and relx_ok and plt_ok):
+            if (rebar_ok and rebar3_ok and relx_ok and plt_ok):
                 run("chmod +x ./rebar")
+                run("chmod +x ./rebar3")
                 run("chmod +x ./relx")
-                run("chmod +x ./concuerror")
                 print "Yay! Nice one trevor!"
             else:
                 print "Boo! Y U NO LIKE ME?"
