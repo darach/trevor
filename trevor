@@ -243,11 +243,6 @@ def wink():
     if (not has_relx()):
         sys.stderr.write("ERROR: Cannot git clone relx! Oh noes!")
         sys.exit(1)
-    if (not has_concuerror()):
-        maybe_git_clone_concuerror()
-    if (not has_concuerror()):
-        sys.stderr.write("ERROR: Cannot git clone concuerror! Oh noes!")
-        sys.exit(1)
 
 def get(local,remote):
     artefact = "%s/%s" % (trevorhub,remote)
